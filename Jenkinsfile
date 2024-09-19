@@ -29,7 +29,7 @@ pipeline {
                 always {
                     pitmutation mutationCoverage: '**/target/pit-reports/**/mutation.xml'
                 }
-            }
+            } 
         }
 
         stage('Docker build and push') {
