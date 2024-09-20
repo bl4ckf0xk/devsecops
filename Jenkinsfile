@@ -32,9 +32,9 @@ pipeline {
             }
         }
 
-        stage('SCM') {
-            checkout scm
-            }
+        // stage('SCM') {
+        //     checkout scm
+        //     }
         stage('SonarQube Analysis') {
             def mvn = tool 'Default Maven';
             withSonarQubeEnv() {
