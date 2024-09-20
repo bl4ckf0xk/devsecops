@@ -13,35 +13,28 @@ pipeline {
             steps {
                 sh "mvn test"
             }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
-                    jacoco execPattern: 'target/jacoco.exec'
-                } 
-            }
         }
 
         stage('Mutation Test - PIT'){
             steps{
                 sh "mvn org.pitest:pitest-maven:mutationCoverage"
             }
-            post {
-                always {
-                    pitmutation mutationStatsFile: '**/target/pit-reports/**/mutations.xml'
-                }
-            }
         }
 
-        // stage('SCM') {
-        //     checkout scm
-        //     }
-        stage('SonarQube Analysis') {
-            steps {
-                sh "mvn sonar:sonar \
-	// 	              -Dsonar.projectKey=numeric-application \
-	// 	              -Dsonar.host.url=http://devsecops-demo.southeastasia.cloudapp.azure.com:9000"
-            }
+        stage('SonarQube - SAST') {
+      steps {
+        withSonarQubeEnv('SonarQube') {
+          sh "mvn sonar:sonar \
+		              -Dsonar.projectKey=numeric-application \
+		              -Dsonar.host.url=http://devsecops-demo.southeastasia.cloudapp.azure.com:9000"
         }
+        timeout(time: 2, unit: 'MINUTES') {
+          script {
+            waitForQualityGate abortPipeline: true
+          }
+        }
+      }
+    }
 
         stage('Docker build and push') {
             steps{
