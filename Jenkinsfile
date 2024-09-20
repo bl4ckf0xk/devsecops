@@ -21,12 +21,18 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-    def mvn = tool 'Default Maven';
-    withSonarQubeEnv() {
-      sh "${mvn}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=numeric-application -Dsonar.projectName='numeric-application'"
-    }
-  }
+        stage('SonarQube Analysis - SAST') {
+            steps{
+                withSonarQubeEnv('SonarQube') {
+                    sh "mvn sonar:sonar -Dsonar.projectKey=numeric-application -Dsonar.host.url=http://devsecops-demo.southeastasia.cloudapp.azure.com:9000"
+                }
+                timeout(time: 2, unit: 'MINUTES') {
+                    script {
+                        waitForQualityGate abortPipeline: true
+                    }
+                }
+            }
+        }
 
         stage('Docker build and push') { 
             steps{
